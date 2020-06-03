@@ -5,6 +5,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	// MYSQL
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 //GetConnection obtiuene una conexion a la base de datos
