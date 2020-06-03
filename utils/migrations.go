@@ -6,7 +6,7 @@ import (
 	"github.com/jee4nc/REST/models"
 )
 
-//MIGRATEDB migra la base de datos
+//MigrateDB migra la base de datos
 func MigrateDB() {
 	db := GetConnection()
 	defer db.Close()
