@@ -83,5 +83,51 @@ func StoreContact(w http.ResponseWriter, r *http.Request) {
 //UpdateContact modifica los datos de un contacto por su ID
 func UpdateContact(w http.ResponseWriter, r *http.Request) {
 	//EStructura donde se almacenaran los datos
+	contactFind := models.Contact{}
+	contactData := models.Contact{}
+	// Se obtiene el parametro id de la URL
+	id := mux.Vars(r)["id"]
+	//Conexion a la DB
+	db := utils.GetConnection()
+	defer db.Close()
+	//Se buscan los datos
+	db.Find(&contactFind, id)
+	if contactFind.ID > 0 {
+		//Si existe el registro se decodifica body
+		err := json.NewDecoder(r.Body).Decode(&contactData)
+		if err != nil {
+			//Si hay algun error se devovlera ERR400
+			utils.SendErr(w, http.StatusBadRequest)
+			return
+		}
+		//Se modifican los datos
+		db.Model(&contactFind).Updates(contactData)
+		//Se codifica el registro modificado y se devuelve
+		j, _ := json.Marshal(contactFind)
+		utils.SendResponse(w, http.StatusOK, j)
+	} else {
+		// si no existe el registro retuns ERR400
+		utils.SendErr(w, http.StatusNotFound)
+	}
+}
 
+//DeleteContact elimina un contacto por ID
+func DeleteContact(w http.ResponseWriter, r *http.Request) {
+	//Estructura donde se guardara el resgistro
+	contact := models.Contact{}
+	//Se obtiene el parametro id de la URL
+	id := mux.Vars(r)["id"]
+	//Conexion a la DB
+	db := utils.GetConnection()
+	defer db.Close()
+	//Se busca el contacto
+	db.Find(&contact, id)
+	if contact.ID > 0 {
+		//Si existe se borra y se envia contenido vacio
+		db.Delete(contact)
+		utils.SendResponse(w, http.StatusOK, []byte(`{}`))
+	} else {
+		// Si no existe el registro devuelve 400ERRO
+		utils.SendErr(w, http.StatusNotFound)
+	}
 }
